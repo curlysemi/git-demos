@@ -138,7 +138,7 @@ class Game(Data):
             self.hints[3].used = True
             self.lamp_turns = 1000
 
-        self.oldloc2 = self.oldloc = self.loc = self.rooms[1]
+        self.oldloc2 = self.oldloc = self.loc = self.rooms[11]
         self.dwarves = [ Dwarf(self.rooms[n]) for n in (19, 27, 33, 44, 64) ]
         self.pirate = Pirate(self.chest_room)
 
