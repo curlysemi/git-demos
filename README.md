@@ -7,7 +7,9 @@ This repo is technically a fork of the [python adventure](https://github.com/bra
 
 ## 'Undoing' Merges
 
+
 ### Setting Up the Bad Revert Demo
+
 ```bash
 git switch master
 git switch -c rel/v1.1-rc
@@ -44,6 +46,7 @@ Given the Selective Git Flow process (where the release is merged into `master` 
 
 This could cause a headache for the developer responsible for the `dev/w001-change-magic` branch, as testing would fail since the changes would no longer be present. And, if they didn't know about the revert commit, it could really ... not be swell. They might try to continually merge the dev branch into `develop`, but get the "Already up to date" message and be confused.
 
+
 ### Fixing It After it Happened
 
 Let's say you're the developer of `dev/w001-change-magic`, and you've been told by a bot or a QA department that your changes have failed testing in `develop`.
@@ -78,7 +81,7 @@ Instead of using `git revert` to create another commit that undoes the changes i
  
 I say "should" in quotation marks because this depends on a few things (how many merges occurred after `dev/w001-change-magic` that also had merge conflicts (and whether or not the repo maintainer is has `rerere` enabled).
 
-In the best-case situation &mdash; such as this demo ;) &mdash; the repo maintainer would simply have to a **rebase** and drop the merge of the branch that shouldn't be in the release.
+In the best-case situation &mdash; such as this demo ;) &mdash; the repo maintainer would simply have to do a **rebase** and drop the merge of the branch that shouldn't be in the release.
 
 Assuming on `rel/v1.1-rc` (if not, switch back to it), use `git log` to figure out how many commits back it was. In our case, it was 1 before our current position.
 
@@ -144,6 +147,7 @@ Save and close the file and Git should take care of the rest.
 > 
 > If you're working in a branch that you haven't pushed yet, you should be fine to take this approach. If you have pushed the branch but no one important ;) is working on that same branch, you should be fine to just force push it.
 
+
 ### Fixing it When Things _Really_ Went Wrong
 
 Sometimes the history of a branch gets really, really messed up. In this scenario, let's say that the repo maintainer did a bad revert when prepping a release, merged it into `master` and `develop`, and the developer responsible for `dev/w001-change-magic` was alerted, didn't know how to simply revert the revert and made a bunch of changes.
@@ -161,37 +165,38 @@ This last command (`git checkout 56046233892f9f96c9b2d9e4c849fe74c68906e6 -- .`)
 
 In practice, you'd need to check _all_ the differences and make sure you're only getting what was messed up history-wise (due to bad use of `git revert` or bad merge conflict resolutions).
 
-<!-- **NOTE:** Here are some other situations where `git checkout <branch/commit> -- .` is useful: -->
 
 ## 'Redoing' Merges
 
-Let's assume bad merge conflict resolutions were made when `branch-a` was merged with `branch-b` to produce `branch-c`. Ideally, you want to catch this before you push `branch-c` and reset, but if this happens and you can't rewrite history, do the following:
+Let's assume that none of the stuff from the other demo happened, but instead bad merge conflict resolutions were made when `dev/w001-change-magic` was merged with `dev/w003-obfuscate-magic-word` in branch `develop`. Ideally, you want to catch this before you push `develop` and instead reset the bad merge, but if this happens and you can't rewrite history, do the following:
 ```bash
-git switch branch-b
+git switch dev/w003-obfuscate-magic-word
 git pull # get latest changes
-git switch branch-a
+git switch dev/w001-change-magic
 git pull # get latest changes
-git switch -c branch-d
-git merge branch-b
+git switch -c mrg/w001/w003
+git merge dev/w003-obfuscate-magic-word
 # resolve conflicts
 git commit
-git switch branch-c
-git merge branch-d
+git switch develop
+git merge mrg/w001/w003
 ```
-Oh, no! We got the same conflicts again when merging `branch-d` into `branch-c`! :O
+Oh, no! We got the same conflicts again when merging `mrg/w001/w003` into `develop`! :O
 ```bash
-git checkout --theirs main.c
-git add main.c
+git checkout --theirs adventure/advent.dat
+git add adventure/advent.dat
 # or, if you're feeling bold:
 # git checkout --theirs .
-# git add main.c
+# git add .
 git commit
 ```
 
 Be more careful next time! Check your changes before committing and pushing!
 
+
 ### Fixing Issues Before Committing
-So, you're taking my advice and checking merges before committing and pushing. Hopefully you haven't had to learn this lesson the hard way. ;)
+
+So, you're taking my advice and checking merges before committing and pushing? Hopefully you haven't had to learn this lesson the hard way. ;)
 
 If you're checking the resulting code before committing and you've found a problem, you can remerge via whatever mergetool(s) you use for individual files like so:
 
@@ -205,7 +210,9 @@ git merge --abort
 # <insert the git merge command you ran before here>
 ```
 
+
 ### Fixing Issues Before Pushing
+
 So, you committed and after testing changes found an issue and need to do the merge over again?
 ```
 git reset HEAD~1 --hard
@@ -214,16 +221,10 @@ And remerge!
 
 > **NOTE:** Sad that you have to re-resolve all conflicts? Enable `rerere`, train using `rerere-train.sh` with your "bad merge" branch, and then re-merge. Then refer to the above section to remerge an individual file.
 >
-> (Don't know what the hash for the bad branch was? Use `git reflog`!)
-
-
-<!--
-
-Th
-
--->
+> (Went through the steps without reading ahead, reset `HEAD`, and now you don't know what the hash for the bad branch was? Use `git reflog`!)
 
 ---
+
 
 ## Original Python Adventure README
 
@@ -231,18 +232,3 @@ Welcome to the git repository for the Python 3 version of Adventure!
 The project README is one level deeper, inside of the package itself:
 
 [adventure/README.txt](adventure/README.txt)
-
-
-<!--
-
-TODOs
-
-TODO: Make a script that rerere trains from the integration branch
-Make an alias that executes rerere train, that is . . .
-
-
-TODO: build aliases for everyone!
-
-
-
- -->
