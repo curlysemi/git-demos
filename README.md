@@ -7,7 +7,7 @@ This repo is technically a fork of the [python adventure](https://github.com/bra
 
 ## 'Undoing' Merges
 
-
+  
 ### Setting Up the Bad Revert Demo
 
 ```bash
@@ -23,6 +23,9 @@ In this scenario, let's say the repo maintainer has to "undo" the merge of `dev/
 ```bash
 git revert db1bb1e03f7f55fde66b58a4de01567856a94e72 -m 1
 ```
+
+(In our scenario, let's imagine that the repo maintainer found this git command by googling for something like 'rollback git merge'.)
+
 `db1bb1e03f7f55fde66b58a4de01567856a94e72` is the commit hash of _my_ local merge commit while writing this up. If you're running through all these steps yourself, you'll have a different commit hash you need to revert. The easiest way to find it is to use `git log` and look for the commit with the message of "Merge branch 'dev/w001-change-magic' into rel/v1.1-rc". If you followed the steps exactly, then you can get away with using `HEAD~1`.
 
 > **NOTE:** Even though this isn't what you should do in this exact situation, when you are reverting a merge, you should probably revert the _merge commit_ instead of the changes in the topic branch. This is because there could be multiple commits in the branch; if there were multiple commits and you weren't reverting the merge commit, you'd have to individually revert each commit specific to that branch. Ain't nobody go time for that!
@@ -75,7 +78,10 @@ git push
 ```
 And voilà! Now you can either create a PR or manually merge the updated `dev/w001-change-magic` branch into `develop` and the changes will return!
 
+
 ### What Should the Repo Maintainer Have Done Instead?
+
+(This is what they should have done in this very specific scenario. For a similar, yet even easier scenario, see the bottom of this section.)
 
 Instead of using `git revert` to create another commit that undoes the changes introduced by the `dev/w001-change-magic` branch, the repo maintainer "should" have taken a different approach.
  
@@ -146,7 +152,15 @@ Save and close the file and Git should take care of the rest.
 > **NOTE:** Rebasing rewrites history, so if you're already merged to `master`, pushed, and people started working off it it, it's generally too late (unless your team is small enough where everyone can easily delete their local copies of `master` and get the correct one.) 
 > 
 > If you're working in a branch that you haven't pushed yet, you should be fine to take this approach. If you have pushed the branch but no one important ;) is working on that same branch, you should be fine to just force push it.
+>
+> In the more complicated scenarios, it might just be easier to revert the merge instead. If you go this route, _please_ let whoever is responsible for the reverted branch know!
 
+The simplest 'undo' a merge scenario is when you have _just_ merged the wrong branch, and haven't done any merges since and haven't pushed. In this scenario, simply do the following:
+```
+git reset HEAD~1 --hard
+```
+<!-- 
+// THIS IS COMMENTED OUT UNTIL I CAN CONTRIVE A BETTER EXAMPLE (I really have had to do this several times)
 
 ### Fixing it When Things _Really_ Went Wrong
 
@@ -164,6 +178,7 @@ git checkout 56046233892f9f96c9b2d9e4c849fe74c68906e6 -- .
 This last command (`git checkout 56046233892f9f96c9b2d9e4c849fe74c68906e6 -- .`) assumes you're in the project's root directory. It'll checkout all files from `56046233892f9f96c9b2d9e4c849fe74c68906e6`. This is nice because it's bringing over the raw files as they were, but with the current history.
 
 In practice, you'd need to check _all_ the differences and make sure you're only getting what was messed up history-wise (due to bad use of `git revert` or bad merge conflict resolutions).
+-->
 
 
 ## 'Redoing' Merges
